@@ -1,0 +1,9 @@
+services:
+  redis:
+    container_name: redis
+    image: redis:7.0.11-alpine # Update to the latest stable version
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data # Persistent data storage

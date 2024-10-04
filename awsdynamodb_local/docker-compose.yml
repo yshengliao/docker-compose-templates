@@ -1,0 +1,18 @@
+services:
+  dynamodb-local:
+    container_name: dynamodb-local # Custom container name for DynamoDB Local
+    image: amazon/dynamodb-local # DynamoDB Local image from Amazon
+    restart: always # Ensure the container restarts if it fails
+    ports:
+      - "8000:8000" # Map local port 8000 to the container's port 8000 (DynamoDB default)
+    volumes:
+      - dynamodb-local-data:/data # Persist data to a local volume
+    networks:
+      - dynamodb-network # Attach to the dedicated network for DynamoDB
+
+volumes:
+  dynamodb-local-data: # Volume to store DynamoDB Local persistent data
+
+networks:
+  dynamodb-network:
+    driver: bridge # Use bridge network for container communication

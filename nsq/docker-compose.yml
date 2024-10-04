@@ -1,0 +1,40 @@
+services:
+  nsqlookupd:
+    container_name: nsqlookupd # Custom container name for NSQ Lookup Daemon
+    image: nsqio/nsq # NSQ Lookup Daemon to coordinate communication
+    command: /nsqlookupd # Start nsqlookupd
+    restart: always # Always restart the container if it fails
+    ports:
+      - "4160:4160" # TCP port for nsqd connections
+      - "4161:4161" # HTTP port for clients to discover nsqd nodes
+    networks:
+      - nsq-network # Attach to the dedicated NSQ network
+
+  nsqd:
+    container_name: nsqd # Custom container name for NSQ Daemon
+    image: nsqio/nsq # NSQ Daemon to handle messages
+    command: /nsqd --lookupd-tcp-address=nsqlookupd:4160 # Connect to nsqlookupd
+    restart: always
+    depends_on:
+      - nsqlookupd # Ensure nsqlookupd starts before nsqd
+    ports:
+      - "4150:4150" # TCP port for receiving messages
+      - "4151:4151" # HTTP port for clients to publish messages
+    networks:
+      - nsq-network # Same network as nsqlookupd
+
+  nsqadmin:
+    container_name: nsqadmin # Custom container name for NSQ Admin interface
+    image: nsqio/nsq # NSQ Admin interface for monitoring
+    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161 # Connect to nsqlookupd for monitoring
+    restart: always
+    depends_on:
+      - nsqlookupd # Ensure nsqlookupd starts before nsqadmin
+    ports:
+      - "4171:4171" # Web UI for monitoring NSQ
+    networks:
+      - nsq-network # Same network as other NSQ services
+
+networks:
+  nsq-network:
+    driver: bridge # Use bridge network for container communication

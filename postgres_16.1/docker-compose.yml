@@ -1,0 +1,21 @@
+services:
+  db:
+    container_name: postgres_db
+    image: postgres:16.1 # Latest stable PostgreSQL version
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persistent volume for database data
+
+  adminer:
+    container_name: adminer_ui
+    image: adminer
+    restart: always
+    ports:
+      - "18080:8080" # Expose Adminer on port 18080
+
+volumes:
+  pgdata: # Define the volume for PostgreSQL data

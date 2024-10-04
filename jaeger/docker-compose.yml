@@ -1,0 +1,25 @@
+services:
+  jaeger:
+    container_name: jaeger_all_in_one # Custom container name for Jaeger
+    image: jaegertracing/all-in-one:latest # The all-in-one Jaeger image (includes agent, collector, query, and UI)
+    restart: always # Ensure the container restarts if it fails
+    ports:
+      - "6831:6831/udp" # For receiving traces from clients via UDP (Thrift)
+      - "6832:6832/udp" # For receiving traces via UDP (Thrift) in non-SaaS deployments
+      - "5778:5778"     # For querying the agent's sampling strategy
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OpenTelemetry gRPC port
+      - "4318:4318"     # OpenTelemetry HTTP port
+      - "14250:14250"   # Jaeger gRPC for collector
+      - "14268:14268"   # HTTP port for Jaeger collector
+      - "14269:14269"   # HTTP admin port for collector
+      - "9411:9411"     # Zipkin-compatible endpoint
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411 # Enable Zipkin format traces
+      - COLLECTOR_OTLP_ENABLED=true # Enable OpenTelemetry Collector
+    networks:
+      - jaeger-network # Attach to the Jaeger-specific network
+
+networks:
+  jaeger-network:
+    driver: bridge # Use a bridge network for container isolation and communication

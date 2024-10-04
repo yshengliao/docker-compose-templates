@@ -1,0 +1,18 @@
+services:
+  db:
+    container_name: mysql_db # Custom container name for MySQL
+    image: mysql:8.3 # MySQL version 8.3
+    command: --default-authentication-plugin=mysql_native_password # Using native password plugin (legacy compatibility)
+    restart: always # Always restart the container if it stops
+    ports:
+      - "3306:3306" # Expose MySQL default port
+    environment:
+      MYSQL_ROOT_PASSWORD: example # Root password for MySQL
+      MYSQL_DATABASE: exampledb # Default database (optional)
+      MYSQL_USER: user # Non-root MySQL user (optional)
+      MYSQL_PASSWORD: password # Password for the non-root MySQL user (optional)
+    volumes:
+      - mysql-data:/var/lib/mysql # Persistent storage for MySQL data
+
+volumes:
+  mysql-data: # Volume for storing MySQL data

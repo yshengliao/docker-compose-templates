@@ -1,0 +1,9 @@
+# Exclude all files
+*
+
+# Allow specific files and directories
+!*/
+!.gitignore
+!*.md
+!*.yml
+!LICENSE
