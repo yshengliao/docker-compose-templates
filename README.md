@@ -1,14 +1,17 @@
 # Docker Compose Templates
 
 Welcome to my Docker Compose template stash! 🎉 Here are the scripts I use to fire up my favorite services. Whether it’s a quick dev setup or something more complex, I’ve got you covered. It’s like a neat toolbox—grab what you need and go. 🚀
+
 歡迎來到我的 Docker Compose 模板收藏庫！🎉 這裡放滿了我常用來啟動各種服務的實用腳本。無論是簡單的開發環境，還是更複雜的架構，這裡都能幫助你迅速上手。把它當作一個整理好的工具箱，隨取隨用！🚀
 
 ## Docker Guide
 
 To use these Docker Compose templates, install Docker. See the [Docker website](https://docs.docker.com/get-docker/) for instructions. Docker Compose helps you easily manage and automate multiple containers locally.
+
 要使用這些 Docker Compose 模板，首先需要安裝 Docker，請參考 [Docker 官網](https://docs.docker.com/get-docker/) 的安裝說明。Docker Compose 是個非常方便的工具，可以幫助你輕鬆管理和自動化本機的多個容器。
 
 Simply run the following command in the directory containing the `docker-compose.yml`:
+
 只要在有 `docker-compose.yml` 的目錄中執行以下指令，就能開始使用：
 
 ```bash
@@ -16,6 +19,7 @@ docker-compose up -d
 ```
 
 When you're done developing, stop all containers with:
+
 當你開發完成後，可以使用以下指令來停止所有容器：
 
 ```bash
@@ -82,8 +86,6 @@ What kind of magic do we have in here? Well, a bit of everything:
 ## License
 
 This work is dedicated to the public domain under the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication. You can copy, modify, and distribute it freely, even for commercial purposes, without asking permission.
-
-這個專案採用 CC0 1.0 通用 (CC0 1.0) 公共領域貢獻許可。你可以自由複製、修改、分發，甚至用於商業用途，無需取得許可。
 
 For more details, see the [LICENSE](./LICENSE) file or visit the full legal text at <https://creativecommons.org/publicdomain/zero/1.0/legalcode>.
 
