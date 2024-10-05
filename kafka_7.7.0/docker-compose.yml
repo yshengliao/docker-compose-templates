@@ -1,0 +1,141 @@
+services:
+  kafka-broker:
+    container_name: kafka-broker
+    image: confluentinc/cp-kafka:7.7.0
+    restart: always
+    hostname: kafka-broker
+    networks:
+      - internal
+      - external
+    ports:
+      - "29092:29092"  # Expose Kafka broker on port 29092 for internal communication
+      - "9093:9093"    # Expose Kafka controller on port 9093 for controller communication
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller  # Define the roles for this instance as both broker and controller
+      KAFKA_NODE_ID: 1  # Set the node ID for this Kafka broker
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093  # Define listener interfaces for broker and controller
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:29092  # Advertise Kafka broker address for external connections
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-broker:9093"  # Define quorum voters for KRaft mode
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT  # Map security protocols for listeners
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER  # Specify listener names for the controller
+      KAFKA_LOG_DIRS: /var/lib/kafka/data  # Kafka log directory for persisting data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Replication factor for the offset topic (single-node setup)
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0  # No delay for consumer group rebalance
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'  # Automatically create topics if they don't exist
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:-7I9-RImlQdaF-mxVqM-CDw}  # Set or use a default cluster ID for KRaft mode
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "Setting up Kafka..."
+        export CLUSTER_ID=$${CLUSTER_ID}
+        echo "Cluster ID: $$CLUSTER_ID"
+        echo "Formatting storage directories"
+        kafka-storage format -t $$CLUSTER_ID -c /etc/kafka/kraft/server.properties || true
+        echo "Starting Kafka"
+        /etc/confluent/docker/run  # Run the Kafka broker after formatting
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list"]  # Health check to verify Kafka broker is running
+      interval: 30s  # Run health check every 30 seconds
+      timeout: 10s  # Health check timeout
+      retries: 5  # Retry health check 5 times
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'  # Limit CPU usage to 0.75 cores
+          memory: 1G  # Limit memory usage to 1GB
+    logging:
+      driver: "json-file"  # Use JSON logging driver
+      options:
+        max-size: "200k"  # Maximum log file size
+        max-file: "10"  # Keep up to 10 log files
+    volumes:
+      - kafka-data:/var/lib/kafka/data  # Volume for Kafka data storage
+
+  control-center:
+    container_name: control-center
+    image: confluentinc/cp-enterprise-control-center:7.7.0
+    restart: always
+    depends_on:
+      - kafka-broker  # Control Center depends on Kafka broker
+    networks:
+      - internal
+      - external
+    ports:
+      - "9021:9021"  # Expose Control Center on port 9021
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-broker:29092'  # Bootstrap server for Control Center to connect to Kafka
+      CONTROL_CENTER_REPLICATION_FACTOR: 1  # Replication factor for Control Center topics (single-node setup)
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1  # Number of partitions for internal topics
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1  # Number of partitions for monitoring topics
+      CONTROL_CENTER_CONNECT_CLUSTER: 'kafka-broker:29092'  # Connect cluster for monitoring Kafka brokers
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1  # Replication factor for metrics topic
+      PORT: 9021  # Set the port for Control Center UI
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9021/health"]  # Health check to ensure Control Center is running
+      interval: 30s  # Run health check every 30 seconds
+      timeout: 10s  # Health check timeout
+      retries: 5  # Retry health check 5 times
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'  # Limit CPU usage to 0.5 cores
+          memory: 1G  # Limit memory usage to 1GB
+    logging:
+      driver: "json-file"  # Use JSON logging driver
+      options:
+        max-size: "200k"  # Maximum log file size
+        max-file: "10"  # Keep up to 10 log files
+
+  schema-registry:
+    container_name: schema-registry
+    image: confluentinc/cp-schema-registry:7.7.0
+    restart: always
+    depends_on:
+      - kafka-broker  # Schema Registry depends on Kafka broker
+    networks:
+      - internal
+    ports:
+      - "8081:8081"  # Expose Schema Registry on port 8081
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka-broker:29092"  # Bootstrap server for Schema Registry to connect to Kafka
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry  # Hostname for Schema Registry
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"  # Listen on all interfaces on port 8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]  # Health check for Schema Registry
+      interval: 30s  # Run health check every 30 seconds
+      timeout: 10s  # Health check timeout
+      retries: 5  # Retry health check 5 times
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'  # Limit CPU usage to 0.5 cores
+          memory: 512M  # Limit memory usage to 512MB
+    logging:
+      driver: "json-file"  # Use JSON logging driver
+      options:
+        max-size: "200k"  # Maximum log file size
+        max-file: "10"  # Keep up to 10 log files
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"  # Expose Kafka UI on port 8080
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local  # Name the Kafka cluster as "local"
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-broker:29092  # Set bootstrap server for the Kafka UI to connect to
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=  # Zookeeper is not required in KRaft mode
+    depends_on:
+      - kafka-broker  # Kafka UI depends on Kafka broker
+    networks:
+      - internal
+      - external
+
+networks:
+  internal:  # Internal network for communication between containers
+  external:  # External network for communication with the host
+
+volumes:
+  kafka-data:  # Volume for Kafka data
