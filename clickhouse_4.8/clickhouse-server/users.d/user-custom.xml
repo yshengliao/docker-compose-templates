@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <users>
+        <!-- 
+        Configuration for the 'default' user.
+        This is the system's default user, but it is recommended to restrict its privileges for security purposes.
+        -->
+        <default>
+            <!-- 
+            Disable access management for the 'default' user.
+            Setting this to 0 means the user cannot create or manage other users or permissions.
+            -->
+            <access_management>0</access_management>
+        </default>
+
+        <!-- 
+        Configuration for the 'replicator' user.
+        This user is generally used for data replication tasks in a multi-replica ClickHouse setup.
+        It is recommended to use a strong password and restrict network access if possible.
+        -->
+        <replicator>
+            <!-- Set the password for the replicator user -->
+            <password>replicator1234</password>
+            <!-- 
+            Define the networks allowed to access this user.
+            <ip>::/0</ip> allows access from any IP address, which is open for development.
+            For security in production, restrict this to specific networks.
+            -->
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <!-- Use the default profile for this user, which defines general permissions and settings -->
+            <profile>default</profile>
+            <!-- Apply the default quota to this user. Customize quota configurations as needed. -->
+            <quota>default</quota>
+        </replicator>
+
+        <!-- 
+        Configuration for the 'clickhouse' user.
+        This user is typically used for running applications or services that interact with ClickHouse.
+        Similar to 'replicator', it's recommended to use a strong password and control network access.
+        -->
+        <clickhouse>
+            <!-- Set the password for the clickhouse user -->
+            <password>clickhouse1234</password>
+            <!-- 
+            Define the networks allowed to access this user.
+            <ip>::/0</ip> allows access from any IP address. Restrict in production environments for better security.
+            -->
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <!-- Use the default profile for general user settings and privileges -->
+            <profile>default</profile>
+            <!-- Apply the default quota to control resource usage for this user -->
+            <quota>default</quota>
+        </clickhouse>
+    </users>
+</clickhouse>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- 
+    Configure ClickHouse to listen on all available network interfaces, 
+    including both IPv6 (::) and IPv4 (0.0.0.0). 
+    This is necessary to allow connections from both other containers in the Docker network 
+    as well as external hosts.
+    -->
+    <listen_host>::</listen_host>  <!-- Listen on all IPv6 addresses -->
+    <listen_host>0.0.0.0</listen_host>  <!-- Listen on all IPv4 addresses -->
+
+    <!-- 
+    This setting allows the server to continue running even if either IPv4 or IPv6 network 
+    is not available (for example, in certain containerized environments). 
+    When set to 1, it tries to listen on available networks and skips those that are unavailable.
+    -->
+    <listen_try>1</listen_try>
+
+    <!-- 
+    Uncomment the following section if you want to enable console logging.
+    This is useful for debugging purposes when running ClickHouse in Docker, 
+    as logs can be output directly to the container logs.
+    -->
+     <!-- Enable logging to console -->
+    <!--
+    <logger>
+        <console>1</console> 
+    </logger>
+    -->
+</clickhouse>

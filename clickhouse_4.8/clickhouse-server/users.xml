@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- Profiles for settings -->
+    <profiles>
+        <!-- Default profile -->
+        <default>
+            <!-- Max memory usage per query (in bytes) -->
+            <max_memory_usage>10000000000</max_memory_usage>
+            <!-- Load balancing strategy: random, nearest_hostname, in_order, first_or_random -->
+            <load_balancing>random</load_balancing>
+        </default>
+
+        <!-- Read-only profile -->
+        <readonly>
+            <readonly>1</readonly>
+        </readonly>
+    </profiles>
+
+    <!-- Users and access control -->
+    <users>
+        <!-- Default user if none specified -->
+        <default>
+            <!-- Password can be set as plaintext, SHA256, or LDAP/Kerberos. Leave empty for no password. -->
+            <password></password>
+
+            <!-- Allow access from any IP -->
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+
+            <!-- Apply default profile and quota -->
+            <profile>default</profile>
+            <quota>default</quota>
+
+            <!-- Option to allow user management (disabled by default) -->
+            <!-- <access_management>1</access_management> -->
+        </default>
+    </users>
+
+    <!-- Quotas configuration -->
+    <quotas>
+        <default>
+            <interval>
+                <!-- Time interval duration (in seconds) -->
+                <duration>3600</duration>
+                <!-- Track resource usage with no limits -->
+                <queries>0</queries>
+                <errors>0</errors>
+                <result_rows>0</result_rows>
+                <read_rows>0</read_rows>
+                <execution_time>0</execution_time>
+            </interval>
+        </default>
+    </quotas>
+</clickhouse>

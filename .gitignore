@@ -7,3 +7,6 @@
 !*.md
 !*.yml
 !LICENSE
+!*/clickhouse-server/*.xml
+!docker_related_config.xml
+!user-custom.xml

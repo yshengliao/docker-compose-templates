@@ -1,0 +1,37 @@
+services:
+  clickhouse:
+    container_name: clickhouse
+    image: clickhouse/clickhouse-server:24.8  # Using ClickHouse version 24.8
+    volumes:
+      - "./clickhouse:/var/lib/clickhouse"  # Persistent data storage
+      - "./clickhouse-server:/etc/clickhouse-server"  # Configuration files
+      - "./dump:/dump"  # Directory for dump files (backup/restore)
+    ports:
+      - "8123:8123"  # HTTP interface for queries
+      - "9000:9000"  # Native TCP interface for clients/services
+      #- "9004:9004"  # MySQL interface (uncomment if needed)
+      #- "9005:9005"  # PostgreSQL interface (uncomment if needed)
+      - "9009:9009"  # Internal communication port
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"  # Limit to 2 CPU cores
+          memory: "4G"  # Limit to 4GB memory
+      restart_policy:
+        condition: on-failure  # Restart on failure
+    logging:
+      driver: "json-file"  # Log using JSON format
+      options:
+        max-size: "500k"  # Max size per log file: 500KB
+        max-file: "5"     # Keep a maximum of 5 log files
+    ulimits:
+      nproc: 65535  # Limit the number of processes
+      nofile:
+        soft: 262144  # Soft limit on file descriptors
+        hard: 262144  # Hard limit on file descriptors
+    networks:
+      - clickhouse  # Custom ClickHouse network
+
+networks:
+  clickhouse:
+    driver: bridge  # Bridge network for container communication
